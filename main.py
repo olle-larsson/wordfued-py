@@ -3,7 +3,10 @@ import copy
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["G", "L", "A", "S", "S"]
+hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G"]
+
+with open("words.json", "r", encoding="utf-8") as file:
+    words = set(json.load(file)["words"])
 
 def initBoard():
     for i in range(15):
@@ -20,9 +23,9 @@ initBoard()
 def displayBoard():
     boardString = "    A B C D E F G H I J K L M N O\n "
     for i, row in enumerate(board):
-        boardString += str(i + 1) + " "
         if (i + 1 < 10):
             boardString += " "
+        boardString += str(i + 1) + " "
         for k, cell in enumerate(row):
             if cell["occupied"]:
                 boardString += cell["letter"] + " "
@@ -34,9 +37,44 @@ def displayBoard():
 
 displayBoard()
 
-with open("words.json", "r", encoding="utf-8") as file:
-    words = set(json.load(file)["words"])
+def characterExistAt(x, y):
+    return board[y] and board[y][x] and board[y][x]["occupied"]
 
+def checkNeighboringWords(x, y, currentLetter):
+    # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
+    # creates a string of all letters found on x axis
+    xAxisChars = currentLetter
+    if characterExistAt(x-1, y):
+        deltaX = 1
+        while True:
+            tempX = x-deltaX
+            if characterExistAt(tempX, y):
+                print(f"found letter {board[y][tempX]["letter"]} at (x-{deltaX}, y)")
+
+                xAxisChars = board[y][tempX]["letter"] + xAxisChars
+                deltaX += 1
+            else:
+                break
+
+    # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
+    if characterExistAt(x+1, y):
+        deltaX = 1
+        while True:
+            tempX = x+deltaX
+            if characterExistAt(tempX, y):
+                print(f"found letter at (x+{deltaX}, y)")
+
+                xAxisChars = xAxisChars + board[y][tempX]["letter"]
+                deltaX += 1
+            else:
+                break
+
+    # check if letters are found on xAxis and a valid word
+    if len(xAxisChars) > 1 and not checkWord(xAxisChars):
+        print(f"tried to combo with inavlid word: {xAxisChars}")
+        return True
+    
+    return False
 
 def checkWord(word):
     return word in words
@@ -78,28 +116,33 @@ def placeWord(word, coordinate, direction):
     wordPoints = 0
     savedHand = hand.copy()
     savedBoard = copy.deepcopy(board)
-    for i in word.upper():
+    for currentLetter in word.upper():
         x, y = increaseCoordinate(coordinate, direction, positionDelta)
         #print("X, y: " + str(x), str(y))
-        #print("letter: " + i)
+        #print("letter: " + currentLetter)
         #print(board[y][x]["letter"])
         if x > 14 or y > 14:
             print("outside board size")
             reset(savedBoard, savedHand)
             return False
-        if board[y][x]["letter"] != "#" and board[y][x]["letter"] != i:
+        if board[y][x]["letter"] != "#" and board[y][x]["letter"] != currentLetter:
             print("tring to overwrite letter")
             reset(savedBoard, savedHand)
             return False
         elif board[y][x]["letter"] == "#":
-            if i not in hand:
+            if currentLetter not in hand:
                 print("letter not in hand")
                 reset(savedBoard, savedHand)
                 return False
-            hand[hand.index(i)] = "#"
-            board[y][x]["letter"] = i
+            hand[hand.index(currentLetter)] = "#"
+            board[y][x]["letter"] = currentLetter
 
-        board[y][x]["letter"] = i
+        if checkNeighboringWords(x, y, currentLetter):
+            print("neighboring word check failed")
+            reset(savedBoard, savedHand)
+            return False
+
+        board[y][x]["letter"] = currentLetter
         board[y][x]["occupied"] = True
         wordPoints += 1
         positionDelta+=1
@@ -117,4 +160,6 @@ print("hand: " + str(hand))
 placeWord("glass", "C5", "L")
 print("hand: " + str(hand))
 displayBoard()
-print("sax" in words)
+
+placeWord("våg", "D3", "L")
+displayBoard()
