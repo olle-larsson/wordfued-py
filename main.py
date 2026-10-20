@@ -1,32 +1,35 @@
 import json
 import copy
 
-alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["A", "H", "E", "J"]
+hand = ["G", "L", "A", "S", "S"]
 
 def initBoard():
     for i in range(15):
-        row = []
+        rows = []
         for j in range(15):
-            row.append({
+            rows.append({
                 "letter": "#",
                 "occupied": False
             })
-        board.append(row)
+        board.append(rows)
 
 initBoard()
 
 def displayBoard():
-    boardString = ""
-    for i, rowY in enumerate(board):
-        for k, cell in enumerate(rowY):
+    boardString = "    A B C D E F G H I J K L M N O\n "
+    for i, row in enumerate(board):
+        boardString += str(i + 1) + " "
+        if (i + 1 < 10):
+            boardString += " "
+        for k, cell in enumerate(row):
             if cell["occupied"]:
                 boardString += cell["letter"] + " "
             else:
                 boardString += "# "
 
-        boardString += "\n"
+        boardString += "\n "
     print(boardString)
 
 displayBoard()
@@ -40,16 +43,16 @@ def checkWord(word):
 
 def increaseCoordinate(coordinate, direction, delta):
 
-    x = alphabet.index(coordinate[0]) + 1
+    x = alphabet.index(coordinate[0])
 
     y = coordinate[1]
     if (len(coordinate) == 3):
         y = y + coordinate[2]
-    y = int(y)
+    y = int(y)-1 # convert to 0-index
 
-    if direction.upper() == "V":
+    if direction == "V":
         x = x + delta
-    elif direction.upper() == "L":
+    elif direction == "L":
         y = y + delta
     return x, y
 
@@ -65,10 +68,11 @@ def reset(savedBoard, savedHand):
 #does not check proper placement (middle of board/next to other word)
 #checks that the word exists, that the letters needed exist and places word
 def placeWord(word, coordinate, direction):
+    direction = direction.upper()
     if (not checkWord(word)):
         print("word not in word list")
         return False
-    if (direction.upper() !="V" and direction.upper() != "L"):
+    if (direction !="V" and direction != "L"):
         print("direction format wrong")
     positionDelta = 0
     wordPoints = 0
@@ -110,7 +114,7 @@ def placeWord(word, coordinate, direction):
         
 
 print("hand: " + str(hand))        
-placeWord("hej", "A14", "V")
+placeWord("glass", "C5", "L")
 print("hand: " + str(hand))
 displayBoard()
 print("sax" in words)
