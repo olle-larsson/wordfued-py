@@ -44,34 +44,63 @@ def checkNeighboringWords(x, y, currentLetter):
     # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
     # creates a string of all letters found on x axis
     xAxisChars = currentLetter
-    if characterExistAt(x-1, y):
-        deltaX = 1
-        while True:
-            tempX = x-deltaX
-            if characterExistAt(tempX, y):
-                print(f"found letter {board[y][tempX]["letter"]} at (x-{deltaX}, y)")
+    deltaX = 1
+    while True:
+        tempX = x-deltaX
+        if characterExistAt(tempX, y):
+            print(f"found letter {board[y][tempX]["letter"]} at (x-{deltaX}, y)")
 
-                xAxisChars = board[y][tempX]["letter"] + xAxisChars
-                deltaX += 1
-            else:
-                break
+            xAxisChars = board[y][tempX]["letter"] + xAxisChars
+            deltaX += 1
+        else:
+            break
 
     # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
-    if characterExistAt(x+1, y):
-        deltaX = 1
-        while True:
-            tempX = x+deltaX
-            if characterExistAt(tempX, y):
-                print(f"found letter at (x+{deltaX}, y)")
+    deltaX = 1
+    while True:
+        tempX = x+deltaX
+        if characterExistAt(tempX, y):
+            print(f"found letter at (x+{deltaX}, y)")
 
-                xAxisChars = xAxisChars + board[y][tempX]["letter"]
-                deltaX += 1
-            else:
-                break
+            xAxisChars = xAxisChars + board[y][tempX]["letter"]
+            deltaX += 1
+        else:
+            break
 
     # check if letters are found on xAxis and a valid word
     if len(xAxisChars) > 1 and not checkWord(xAxisChars):
         print(f"tried to combo with inavlid word: {xAxisChars}")
+        return True
+
+    # check letter found at (x, y-1) and continue check letters at (x, y-deltaY)
+    # creates a string of all letters found on y axis
+    yAxisChars = currentLetter
+    deltaY = 1
+    while True:
+        tempY = y-deltaY
+        if characterExistAt(x, tempY):
+            print(f"found letter {board[tempY][x]["letter"]} at (x, y-{deltaY})")
+
+            yAxisChars = board[tempY][x]["letter"] + yAxisChars
+            deltaY += 1
+        else:
+            break
+
+    # check letter found at (x, y+1) and continue check letters at (x-deltaX, y)
+    deltaY = 1
+    while True:
+        tempY = y+deltaY
+        if characterExistAt(x, tempY):
+            print(f"found letter at (x, y+{deltaY})")
+
+            yAxisChars = yAxisChars + board[tempY][x]["letter"]
+            deltaY += 1
+        else:
+            break
+
+    # check if letters are found on yAxis and is a valid word
+    if len(yAxisChars) > 1 and not checkWord(yAxisChars):
+        print(f"tried to combo with invalid word: {yAxisChars}")
         return True
     
     return False
@@ -99,6 +128,7 @@ def reset(savedBoard, savedHand):
     global hand
     board = savedBoard
     hand = savedHand
+
 
 #unfinished
 #in the form: "hej", "C4", "V"
@@ -151,10 +181,8 @@ def placeWord(word, coordinate, direction):
     return True
 
 
-        
 
 
-        
 
 print("hand: " + str(hand))        
 placeWord("glass", "C5", "L")
