@@ -3,7 +3,7 @@ import copy
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N"]
+hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G"]
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
@@ -111,7 +111,7 @@ def checkWord(word):
 
 def increaseCoordinate(coordinate, direction, delta):
 
-    x = alphabet.index(coordinate[0])
+    x = alphabet.index(coordinate[0].upper())
 
     y = coordinate[1]
     if (len(coordinate) == 3):
@@ -238,16 +238,30 @@ def placeWord(word, coordinate, direction):
     
 
     print("checks succeded, word: '" + word + "' written")
-    return True
+    return wordPoints
+        
+
+def main():
+    displayBoard()
+    global points
+    print("Poäng: " + str(points))
+    print ("hand: " + str(hand))
+    word = input("Välj ord att placera: ")
+    coordinate = input("Välj coordinat att placera på (ex: D3): ")
+    direction = input("Välj riktning, vågrät (V) eller lodrät (L): ")
+    newPoints = placeWord(word, coordinate, direction)
+    if not newPoints:
+        return False
+    points+= newPoints
 
 
+while True:
+    main()
 
+# print("hand: " + str(hand))        
+# placeWord("glass", "C5", "L")
+# print("hand: " + str(hand))
+# displayBoard()
 
-
-print("hand: " + str(hand))        
-placeWord("glass", "C5", "L")
-print("hand: " + str(hand))
-displayBoard()
-
-placeWord("en", "C10", "L")
+placeWord("våg", "D3", "L")
 displayBoard()
