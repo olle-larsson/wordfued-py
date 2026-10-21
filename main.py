@@ -3,7 +3,7 @@ import copy
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G"]
+hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N"]
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
@@ -40,7 +40,7 @@ displayBoard()
 def characterExistAt(x, y):
     return board[y] and board[y][x] and board[y][x]["occupied"]
 
-def checkNeighboringWords(x, y, currentLetter):
+def checkNeighboringWordsOnXaxis(x, y, currentLetter):
     # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
     # creates a string of all letters found on x axis
     xAxisChars = currentLetter
@@ -72,6 +72,7 @@ def checkNeighboringWords(x, y, currentLetter):
         print(f"tried to combo with inavlid word: {xAxisChars}")
         return True
 
+def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     # check letter found at (x, y-1) and continue check letters at (x, y-deltaY)
     # creates a string of all letters found on y axis
     yAxisChars = currentLetter
@@ -167,15 +168,74 @@ def placeWord(word, coordinate, direction):
             hand[hand.index(currentLetter)] = "#"
             board[y][x]["letter"] = currentLetter
 
-        if checkNeighboringWords(x, y, currentLetter):
-            print("neighboring word check failed")
-            reset(savedBoard, savedHand)
-            return False
+        if direction == "V":
+            if checkNeighboringWordsOnYaxis(x, y, currentLetter):
+                print("neighboring word check failed")
+                reset(savedBoard, savedHand)
+                return False
+        else:
+            if checkNeighboringWordsOnXaxis(x, y, currentLetter):
+                print("neighboring word check failed")
+                reset(savedBoard, savedHand)
+                return False
+        
 
         board[y][x]["letter"] = currentLetter
         board[y][x]["occupied"] = True
         wordPoints += 1
         positionDelta+=1
+
+    # extra checks
+    x, y = increaseCoordinate(coordinate, direction, 0)
+    deltaX = 1
+    deltaY = 1
+    yAxisChars = word
+    xAxisChars = word
+    while True:
+        if direction == "V":
+            tempY = y-deltaY
+            if characterExistAt(x, tempY):
+                print(f"found letter {board[tempY][x]["letter"]} at (x, y-{deltaY})")
+    
+                yAxisChars = board[tempY][x]["letter"] + yAxisChars
+                deltaY += 1
+            else:
+                break
+        else:
+            tempX = y-deltaX
+            if characterExistAt(x, tempX):
+                print(f"found letter {board[tempX][x]["letter"]} at (x, y-{deltaX})")
+    
+                xAxisChars = board[tempX][x]["letter"] + xAxisChars
+                deltaX += 1
+            else:
+                break
+    
+    y = y + len(word)
+    x = x + len(word)
+    deltaX = 1
+    deltaY = 1
+
+    while True:
+        if direction == "V":
+            tempY = y+deltaY
+            if characterExistAt(x, tempY):
+                print(f"found letter {board[tempY][x]["letter"]} at (x, y-{deltaY})")
+    
+                yAxisChars = board[tempY][x]["letter"] + yAxisChars
+                deltaY += 1
+            else:
+                break
+        else:
+            tempX = y+deltaX
+            if characterExistAt(x, tempX):
+                print(f"found letter {board[tempX][x]["letter"]} at (x, y-{deltaX})")
+    
+                xAxisChars = board[tempX][x]["letter"] + xAxisChars
+                deltaX += 1
+            else:
+                break
+    
 
     print("checks succeded, word: '" + word + "' written")
     return True
@@ -189,5 +249,5 @@ placeWord("glass", "C5", "L")
 print("hand: " + str(hand))
 displayBoard()
 
-placeWord("våg", "D3", "L")
+placeWord("en", "C10", "L")
 displayBoard()
