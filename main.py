@@ -3,7 +3,7 @@ import copy
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G"]
+hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N"]
 points = 0
 
 with open("words.json", "r", encoding="utf-8") as file:
@@ -108,6 +108,7 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     return False
 
 def checkWord(word):
+    word = word.lower()
     return word in words
 
 def increaseCoordinate(coordinate, direction, delta):
@@ -186,7 +187,7 @@ def placeWord(word, coordinate, direction):
         wordPoints += 1
         positionDelta+=1
 
-    # extra checks
+    # checking the entire words, without counting the letter you just placed
     x, y = increaseCoordinate(coordinate, direction, 0)
     deltaX = 1
     deltaY = 1
