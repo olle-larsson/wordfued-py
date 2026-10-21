@@ -4,6 +4,7 @@ import copy
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
 hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G"]
+points = 0
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
