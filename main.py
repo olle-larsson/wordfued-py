@@ -120,7 +120,7 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     return False
 
 def checkWord(word):
-    return word in words
+    return word.lower() in words
 
 def increaseCoordinate(coordinate, direction, delta):
 
@@ -180,17 +180,17 @@ def placeWord(word, coordinate, direction):
                 return False
             hand[hand.index(currentLetter)] = "#"
             board[y][x]["letter"] = currentLetter
-
-        if direction == "V":
-            if checkNeighboringWordsOnYaxis(x, y, currentLetter):
-                print("neighboring word check failed")
-                reset(savedBoard, savedHand)
-                return False
         else:
-            if checkNeighboringWordsOnXaxis(x, y, currentLetter):
-                print("neighboring word check failed")
-                reset(savedBoard, savedHand)
-                return False
+            if direction == "V":
+                if checkNeighboringWordsOnYaxis(x, y, currentLetter):
+                    print("neighboring word check failed")
+                    reset(savedBoard, savedHand)
+                    return False
+            else:
+                if checkNeighboringWordsOnXaxis(x, y, currentLetter):
+                    print("neighboring word check failed")
+                    reset(savedBoard, savedHand)
+                    return False
         
 
         board[y][x]["letter"] = currentLetter
