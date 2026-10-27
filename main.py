@@ -114,11 +114,18 @@ def characterExistAt(x, y):
     
     return board[y][x]["occupied"]
 
+def getPointsFromWord(word):
+    total = 0
+    for letter in word:
+        total += letterStats[letter][1]
+    return total
+
 def checkNeighboringWordsOnXaxis(x, y, currentLetter):
     # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
     # creates a string of all letters found on x axis
     xAxisChars = currentLetter
     deltaX = 1
+    score = 0
     while True:
         tempX = x-deltaX
         if characterExistAt(tempX, y):
@@ -147,15 +154,17 @@ def checkNeighboringWordsOnXaxis(x, y, currentLetter):
         return True
 
     if len(xAxisChars) > 1 and checkWord(xAxisChars):
-        print(f"found valid word: {xAxisChars}")
+        score = getPointsFromWord(xAxisChars)
+        print(f"found valid word: {xAxisChars}, Gave {score} points")
 
-    return False
+    return False, score
 
 def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     # check letter found at (x, y-1) and continue check letters at (x, y-deltaY)
     # creates a string of all letters found on y axis
     yAxisChars = currentLetter
     deltaY = 1
+    score = 0
     while True:
         tempY = y-deltaY
         if characterExistAt(x, tempY):
@@ -184,10 +193,10 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
         return True
 
     if len(yAxisChars) > 1 and checkWord(yAxisChars):
-        print(f"found valid word: {yAxisChars}")
+        score = getPointsFromWord(yAxisChars)
+        print(f"found valid word: {yAxisChars}, Gave {score} points")
 
-    
-    return False
+    return False, score
 
 def checkWord(word):
     return word.lower() in words
@@ -200,8 +209,6 @@ def increaseCoordinate(coordinate, direction, delta):
     if (len(coordinate) == 3):
         y = y + coordinate[2]
     y = int(y)-1 # convert to 0-index
-
-    print("x, y: " + str(x), str(y))
 
     if direction == "V":
         x = x + delta
@@ -241,6 +248,8 @@ def placeWord(word, coordinate, direction):
             print("outside board size")
             reset(savedBoard, savedHand)
             return False
+        
+        notMyLetter = False
         if board[y][x]["letter"] != "#" and board[y][x]["letter"] != currentLetter:
             print("tring to overwrite letter")
             reset(savedBoard, savedHand)
@@ -253,13 +262,20 @@ def placeWord(word, coordinate, direction):
             hand[currentPlayer][hand[currentPlayer].index(currentLetter)] = "#"
             board[y][x]["letter"] = currentLetter
         else:
+            notMyLetter = True
+
+        if not notMyLetter:
             if direction == "V":
-                if checkNeighboringWordsOnYaxis(x, y, currentLetter):
+                hasNoNeighboringWords, score = checkNeighboringWordsOnYaxis(x, y, currentLetter)
+                wordPoints += score
+                if hasNoNeighboringWords:
                     print("neighboring word check failed")
                     reset(savedBoard, savedHand)
                     return False
             else:
-                if checkNeighboringWordsOnXaxis(x, y, currentLetter):
+                hasNoNeighboringWords, score = checkNeighboringWordsOnXaxis(x, y, currentLetter)
+                wordPoints += score
+                if hasNoNeighboringWords:
                     print("neighboring word check failed")
                     reset(savedBoard, savedHand)
                     return False
@@ -270,10 +286,13 @@ def placeWord(word, coordinate, direction):
         wordPoints += letterStats[currentLetter][1]
         positionDelta+=1
 
+    print(f"gave: {wordPoints} for word: {word} and its neighboring words")
+
     # checking the entire words, without counting the letter you just placed
     x, y = increaseCoordinate(coordinate, direction, 0)
     deltaX = 1
     deltaY = 1
+    entireWordScore = 0
     yAxisChars = word
     xAxisChars = word
     while True:
@@ -320,7 +339,16 @@ def placeWord(word, coordinate, direction):
                 deltaX += 1
             else:
                 break
+
+    if direction == "V":
+        if len(xAxisChars) > len(word) and not checkWord(xAxisChars):
+            print(f"tried to combo with invalid word: {xAxisChars}")
+    else:
+        if len(yAxisChars) > len(word) and not checkWord(yAxisChars):
+            print(f"tried to combo with invalid word: {yAxisChars}")
     
+    print("entire word on y axis: " + yAxisChars)
+    print("entire word on x axis: " + xAxisChars)
 
     print("checks succeded, word: '" + word + "' written")
     return wordPoints
@@ -373,9 +401,9 @@ def main():
     points[currentPlayer]+= newPoints
     currentPlayer = (currentPlayer + 1)%numberOfPlayers
 
-
 while True:
     main()
+
 
 # print("hand: " + str(hand))        
 # placeWord("glass", "C5", "L")
