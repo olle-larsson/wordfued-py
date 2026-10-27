@@ -3,7 +3,7 @@ import copy
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 board = []
-hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N"]
+hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N", "S", "K", "A", "R", "T", "A", "N"]
 points = 0
 
 with open("words.json", "r", encoding="utf-8") as file:
@@ -13,9 +13,14 @@ def initBoard():
     for i in range(15):
         rows = []
         for j in range(15):
+            multiplier = 1
+            if j % 2 == (i % 2):
+                multiplier = 2
+            
             rows.append({
                 "letter": "#",
-                "occupied": False
+                "occupied": False,
+                "multiplier": multiplier
             })
         board.append(rows)
 
@@ -32,6 +37,7 @@ def displayBoard():
                 boardString += cell["letter"] + " "
             else:
                 boardString += "# "
+                #boardString += (str(cell["multiplier"] > 1 and cell["multiplier"] or "#")) + " "
 
         boardString += "\n "
     print(boardString)
@@ -39,7 +45,19 @@ def displayBoard():
 displayBoard()
 
 def characterExistAt(x, y):
-    return board[y] and board[y][x] and board[y][x]["occupied"]
+    if x < 0 or y < 0:
+        return False
+
+    if x > 14 or y > 14:
+        return False
+    
+    if not board[y]:
+        return False
+    
+    if not board[y][x]:
+        return False
+    
+    return board[y][x]["occupied"]
 
 def checkNeighboringWordsOnXaxis(x, y, currentLetter):
     # check letter found at (x-1, y) and continue check letters at (x-deltaX, y)
@@ -73,6 +91,11 @@ def checkNeighboringWordsOnXaxis(x, y, currentLetter):
         print(f"tried to combo with inavlid word: {xAxisChars}")
         return True
 
+    if len(xAxisChars) > 1 and checkWord(xAxisChars):
+        print(f"found valid word: {xAxisChars}")
+
+    return False
+
 def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     # check letter found at (x, y-1) and continue check letters at (x, y-deltaY)
     # creates a string of all letters found on y axis
@@ -104,12 +127,15 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     if len(yAxisChars) > 1 and not checkWord(yAxisChars):
         print(f"tried to combo with invalid word: {yAxisChars}")
         return True
+
+    if len(yAxisChars) > 1 and checkWord(yAxisChars):
+        print(f"found valid word: {yAxisChars}")
+
     
     return False
 
 def checkWord(word):
-    word = word.lower()
-    return word in words
+    return word.lower() in words
 
 def increaseCoordinate(coordinate, direction, delta):
 
@@ -119,6 +145,8 @@ def increaseCoordinate(coordinate, direction, delta):
     if (len(coordinate) == 3):
         y = y + coordinate[2]
     y = int(y)-1 # convert to 0-index
+
+    print("x, y: " + str(x), str(y))
 
     if direction == "V":
         x = x + delta
