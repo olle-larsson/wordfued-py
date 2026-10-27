@@ -1,17 +1,32 @@
 import json
 import copy
 import random
-import math
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 letterStats = {"A" : [10, 1], "B": [2, 4], "C": [2, 8], "D": [6,1], "E": [8,1], "F":[2,4], "G":[3,2], "H":[2,3], "I":[5,1], "J":[1,7], "K":[3,3], "L":[7,1], "M":[3,3], "N":[7,1], "O":[5,2], "P":[2,4], "Q":[1,10], "R":[9,1], "S":[8,1], "T":[7,1], "U":[3,4], "V":[2,3], "Y":[2,8], "Å":[2,4], "Ä":[2,4], "Ö":[2,4]}
 board = []
-hand = ["G", "L", "A", "S", "S", "V", "E", "J", "Å", "G", "E", "N", "S", "K", "A", "R", "T", "A", "N"]
-points = 0
+hand = []
+points = []
 letterBag = []
+numberOfPlayers = 2
+handSize = 7
+currentPlayer = 0
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
+
+def initHand():
+    singlePlayerHand = []
+    for i in range(handSize):
+        singlePlayerHand.append("#")
+    for i in range (numberOfPlayers):
+        hand.append(singlePlayerHand.copy())
+initHand()
+
+def initPoints():
+    for i in range(numberOfPlayers):
+        points.append(0)
+initPoints()
 
 def initBoard():
     for i in range(15):
@@ -61,7 +76,7 @@ initLetterBag()
 
 def displayHand():
     handString = ""
-    for i in hand:
+    for i in hand[currentPlayer]:
         if i == "#":
             handString += str(i) + ", "
             continue
@@ -79,9 +94,9 @@ def getNewLetter():
 
 
 def updateHand():
-    for i in hand:
+    for i in hand[currentPlayer]:
         if i == "#":
-            hand[hand.index(i)] = getNewLetter()
+            hand[currentPlayer][hand[currentPlayer].index(i)] = getNewLetter()
 
 
 def characterExistAt(x, y):
@@ -198,7 +213,7 @@ def reset(savedBoard, savedHand):
     global board
     global hand
     board = savedBoard
-    hand = savedHand
+    hand[currentPlayer] = savedHand[currentPlayer]
 
 
 #unfinished
@@ -215,7 +230,7 @@ def placeWord(word, coordinate, direction):
         print("direction format wrong")
     positionDelta = 0
     wordPoints = 0
-    savedHand = hand.copy()
+    savedHand = hand[currentPlayer].copy()
     savedBoard = copy.deepcopy(board)
     for currentLetter in word.upper():
         x, y = increaseCoordinate(coordinate, direction, positionDelta)
@@ -231,11 +246,11 @@ def placeWord(word, coordinate, direction):
             reset(savedBoard, savedHand)
             return False
         elif board[y][x]["letter"] == "#":
-            if currentLetter not in hand:
+            if currentLetter not in hand[currentPlayer]:
                 print("letter not in hand")
                 reset(savedBoard, savedHand)
                 return False
-            hand[hand.index(currentLetter)] = "#"
+            hand[currentPlayer][hand[currentPlayer].index(currentLetter)] = "#"
             board[y][x]["letter"] = currentLetter
         else:
             if direction == "V":
@@ -309,20 +324,54 @@ def placeWord(word, coordinate, direction):
 
     print("checks succeded, word: '" + word + "' written")
     return wordPoints
+
+def exchangeLetters(letterString):
+    for letter in letterString:
+        if letter.upper() not in hand[currentPlayer]:
+            return False
+        hand[currentPlayer][hand[currentPlayer].index(letter.upper())] = "#"
+    return True
+
+def exchangeOrPlace():
+    choice = input("Vill du byta bokstäver (b) eller placera ett ord (p)? ")
+    choice = choice.upper()
+    if choice == "B" or choice == "P":
+        return choice
+
+    print("Ogiltigt val, skriv bara 'p' eller 'b'")
+    return False
+
             
 def main():
     displayBoard()
     global points
-    print("Poäng: " + str(points))
+    global currentPlayer
+    print("Spelare " + str(currentPlayer + 1) + "s tur")
+    pointsString = "Poäng: "
+    for i in range(numberOfPlayers):
+        pointsString += "Spelare " + str(i+1) + ": " + str(points[i]) + ", "
+    print(pointsString)
     updateHand()
     displayHand()
+    choice = exchangeOrPlace()
+    if choice == False:
+        return False
+    if choice == "B":
+        if not exchangeLetters(input("Vilka bokstäver vill du byta? ")):
+            print("Du har inte alla bokstäver du skrev, och skriv endast bokstäver")
+            return False
+        currentPlayer = (currentPlayer + 1)%numberOfPlayers
+        print("Lyckades byta ut bokstäver \n")
+        return True
+    
     word = input("Välj ord att placera: ")
     coordinate = input("Välj coordinat att placera på (ex: D3): ")
     direction = input("Välj riktning, vågrät (V) eller lodrät (L): ")
     newPoints = placeWord(word, coordinate, direction)
     if not newPoints:
         return False
-    points+= newPoints
+    points[currentPlayer]+= newPoints
+    currentPlayer = (currentPlayer + 1)%numberOfPlayers
 
 
 while True:
