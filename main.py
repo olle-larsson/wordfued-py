@@ -1,5 +1,7 @@
 import json
 import copy
+import random
+import math
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 letterStats = {"A" : [10, 1], "B": [2, 4], "C": [2, 8], "D": [6,1], "E": [8,1], "F":[2,4], "G":[3,2], "H":[2,3], "I":[5,1], "J":[1,7], "K":[3,3], "L":[7,1], "M":[3,3], "N":[7,1], "O":[5,2], "P":[2,4], "Q":[1,10], "R":[9,1], "S":[8,1], "T":[7,1], "U":[3,4], "V":[2,3], "Y":[2,8], "Å":[2,4], "Ä":[2,4], "Ö":[2,4]}
@@ -47,8 +49,34 @@ def initLetterBag():
         print(letter)
         for i in range(letterStats[letter][0]):
             letterBag.append([letter, letterStats[letter][1]])
+    random.shuffle(letterBag)
     print(letterBag)
 initLetterBag()
+
+def displayHand():
+    handString = ""
+    for i in hand:
+        if i == "#":
+            handString += str(i) + ", "
+            continue
+        handString += (str(i) + "(" + str(letterStats[i][1]) + "), ") 
+    print ("Dina bokstäver och deras poängvärden: " + handString)
+
+def getNewLetter():
+    letter = ""
+    for i in letterBag:
+        if i[0] != "#":
+            letter = i[0]
+            letterBag[letterBag.index(i)][0] = "#"
+            return letter
+    print("Slut på bokstäver")
+
+
+def updateHand():
+    for i in hand:
+        if i == "#":
+            hand[hand.index(i)] = getNewLetter()
+
 
 def characterExistAt(x, y):
     return board[y] and board[y][x] and board[y][x]["occupied"]
@@ -195,7 +223,7 @@ def placeWord(word, coordinate, direction):
 
         board[y][x]["letter"] = currentLetter
         board[y][x]["occupied"] = True
-        wordPoints += 1
+        wordPoints += letterStats[currentLetter][1]
         positionDelta+=1
 
     # extra checks
@@ -252,13 +280,13 @@ def placeWord(word, coordinate, direction):
 
     print("checks succeded, word: '" + word + "' written")
     return wordPoints
-        
-
+            
 def main():
     displayBoard()
     global points
     print("Poäng: " + str(points))
-    print ("hand: " + str(hand))
+    updateHand()
+    displayHand()
     word = input("Välj ord att placera: ")
     coordinate = input("Välj coordinat att placera på (ex: D3): ")
     direction = input("Välj riktning, vågrät (V) eller lodrät (L): ")
