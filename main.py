@@ -1,6 +1,7 @@
 import json
 import copy
 import random
+import math
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 letterStats = {"A" : [10, 1], "B": [2, 4], "C": [2, 8], "D": [6,1], "E": [8,1], "F":[2,4], "G":[3,2], "H":[2,3], "I":[5,1], "J":[1,7], "K":[3,3], "L":[7,1], "M":[3,3], "N":[7,1], "O":[5,2], "P":[2,4], "Q":[1,10], "R":[9,1], "S":[8,1], "T":[7,1], "U":[3,4], "V":[2,3], "Y":[2,8], "Å":[2,4], "Ä":[2,4], "Ö":[2,4]}
@@ -11,6 +12,14 @@ letterBag = []
 numberOfPlayers = 2
 handSize = 7
 currentPlayer = 0
+
+while True:
+    number = input("Antal spelare: ")
+    if number.isdigit():
+        numberOfPlayers = int(math.floor(float(number)))
+        print("yay")
+        break
+    print("Skriv en siffra")
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
