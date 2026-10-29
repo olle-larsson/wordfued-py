@@ -198,7 +198,7 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     # check if letters are found on yAxis and is a valid word
     if len(yAxisChars) > 1 and not checkWord(yAxisChars):
         print(f"tried to combo with invalid word: {yAxisChars}")
-        return True, points
+        return True, score
 
     if len(yAxisChars) > 1 and checkWord(yAxisChars):
         score = getPointsFromWord(yAxisChars)
