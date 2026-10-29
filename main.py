@@ -1,7 +1,6 @@
 import json
 import copy
 import random
-import math
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Å", "Ä", "Ö"]
 letterStats = {"A" : [10, 1], "B": [2, 4], "C": [2, 8], "D": [6,1], "E": [8,1], "F":[2,4], "G":[3,2], "H":[2,3], "I":[5,1], "J":[1,7], "K":[3,3], "L":[7,1], "M":[3,3], "N":[7,1], "O":[5,2], "P":[2,4], "Q":[1,10], "R":[9,1], "S":[8,1], "T":[7,1], "U":[3,4], "V":[2,3], "Y":[2,8], "Å":[2,4], "Ä":[2,4], "Ö":[2,4]}
@@ -12,17 +11,18 @@ letterBag = []
 numberOfPlayers = 2
 handSize = 7
 currentPlayer = 0
+wordConnectingToAtLeastOneOtherWord = False
+
+with open("words.json", "r", encoding="utf-8") as file:
+    words = set(json.load(file)["words"])
 
 while True:
     number = input("Antal spelare: ")
     if number.isdigit():
-        numberOfPlayers = int(math.floor(float(number)))
+        numberOfPlayers = int(number)
         print("yay")
         break
     print("Skriv en siffra")
-
-with open("words.json", "r", encoding="utf-8") as file:
-    words = set(json.load(file)["words"])
 
 def initHand():
     singlePlayerHand = []
@@ -160,10 +160,12 @@ def checkNeighboringWordsOnXaxis(x, y, currentLetter):
     # check if letters are found on xAxis and a valid word
     if len(xAxisChars) > 1 and not checkWord(xAxisChars):
         print(f"tried to combo with inavlid word: {xAxisChars}")
-        return True
+        return True, score
 
     if len(xAxisChars) > 1 and checkWord(xAxisChars):
         score = getPointsFromWord(xAxisChars)
+        global wordConnectingToAtLeastOneOtherWord
+        wordConnectingToAtLeastOneOtherWord = True
         print(f"found valid word: {xAxisChars}, Gave {score} points")
 
     return False, score
@@ -199,15 +201,19 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     # check if letters are found on yAxis and is a valid word
     if len(yAxisChars) > 1 and not checkWord(yAxisChars):
         print(f"tried to combo with invalid word: {yAxisChars}")
-        return True
+        return True, points
 
     if len(yAxisChars) > 1 and checkWord(yAxisChars):
         score = getPointsFromWord(yAxisChars)
+        global wordConnectingToAtLeastOneOtherWord
+        wordConnectingToAtLeastOneOtherWord = True
         print(f"found valid word: {yAxisChars}, Gave {score} points")
 
     return False, score
 
 def checkWord(word):
+    if (word.length <= 1): 
+        return False
     return word.lower() in words
 
 def increaseCoordinate(coordinate, direction, delta):
@@ -228,8 +234,10 @@ def increaseCoordinate(coordinate, direction, delta):
 def reset(savedBoard, savedHand):
     global board
     global hand
+    global wordConnectingToAtLeastOneOtherWord 
     board = savedBoard
     hand[currentPlayer] = savedHand[currentPlayer]
+    wordConnectingToAtLeastOneOtherWord = False
 
 
 #unfinished
@@ -244,6 +252,7 @@ def placeWord(word, coordinate, direction):
         return False
     if (direction !="V" and direction != "L"):
         print("direction format wrong")
+        return False
     positionDelta = 0
     wordPoints = 0
     savedHand = hand[currentPlayer].copy()
