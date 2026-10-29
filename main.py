@@ -239,6 +239,14 @@ def reset(savedBoard, savedHand):
     hand[currentPlayer] = savedHand[currentPlayer]
     wordConnectingToAtLeastOneOtherWord = False
 
+def getLettersPlacedOnBoard():
+    letters = []
+    for row in board:
+        for cell in row:
+            if cell["occupied"]:
+                letters.append(cell["letter"])
+    return len(letters)
+
 
 #unfinished
 #in the form: "hej", "C4", "V"
@@ -255,8 +263,14 @@ def placeWord(word, coordinate, direction):
         return False
     positionDelta = 0
     wordPoints = 0
+    print(hand, hand[currentPlayer], currentPlayer, "hand, hand[currentPlayer]")
     savedHand = hand[currentPlayer].copy()
     savedBoard = copy.deepcopy(board)
+    connectedToOtherWord = False
+    print(getLettersPlacedOnBoard(), "getLettersPlacedOnBoard()")
+    if getLettersPlacedOnBoard() == 0:
+        connectedToOtherWord = True
+
     for currentLetter in word.upper():
         x, y = increaseCoordinate(coordinate, direction, positionDelta)
         #print("X, y: " + str(x), str(y))
@@ -286,6 +300,9 @@ def placeWord(word, coordinate, direction):
             if direction == "V":
                 hasNoNeighboringWords, score = checkNeighboringWordsOnYaxis(x, y, currentLetter)
                 wordPoints += score
+                if score > 0:
+                    connectedToOtherWord = True
+
                 if hasNoNeighboringWords:
                     print("neighboring word check failed")
                     reset(savedBoard, savedHand)
@@ -293,11 +310,13 @@ def placeWord(word, coordinate, direction):
             else:
                 hasNoNeighboringWords, score = checkNeighboringWordsOnXaxis(x, y, currentLetter)
                 wordPoints += score
+                if score > 0:
+                    connectedToOtherWord = True
+
                 if hasNoNeighboringWords:
                     print("neighboring word check failed")
                     reset(savedBoard, savedHand)
                     return False
-        
 
         board[y][x]["letter"] = currentLetter
         board[y][x]["occupied"] = True
@@ -359,14 +378,25 @@ def placeWord(word, coordinate, direction):
                 break
 
     if direction == "V":
-        if len(xAxisChars) > len(word) and not checkWord(xAxisChars):
-            print(f"tried to combo with invalid word: {xAxisChars}")
+        if len(xAxisChars) > len(word):
+            if not checkWord(xAxisChars):
+                print(f"tried to combo with invalid word: {xAxisChars}")
+            else:
+                connectedToOtherWord = True
     else:
-        if len(yAxisChars) > len(word) and not checkWord(yAxisChars):
-            print(f"tried to combo with invalid word: {yAxisChars}")
-    
+        if len(yAxisChars) > len(word): 
+            if not checkWord(yAxisChars):
+                print(f"tried to combo with invalid word: {yAxisChars}")
+            else:
+                connectedToOtherWord = True
+
     print("entire word on y axis: " + yAxisChars)
     print("entire word on x axis: " + xAxisChars)
+
+    if not connectedToOtherWord:
+        print("word not connected to any other word")
+        reset(savedBoard, savedHand)
+        return False
 
     print("checks succeded, word: '" + word + "' written")
     return wordPoints
