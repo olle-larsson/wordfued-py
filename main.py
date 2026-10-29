@@ -212,7 +212,7 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
     return False, score
 
 def checkWord(word):
-    if (word.length <= 1): 
+    if (len(word) <= 1): 
         return False
     return word.lower() in words
 
