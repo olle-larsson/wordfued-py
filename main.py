@@ -11,7 +11,6 @@ letterBag = []
 numberOfPlayers = 2
 handSize = 7
 currentPlayer = 0
-wordConnectingToAtLeastOneOtherWord = False
 
 with open("words.json", "r", encoding="utf-8") as file:
     words = set(json.load(file)["words"])
@@ -164,8 +163,6 @@ def checkNeighboringWordsOnXaxis(x, y, currentLetter):
 
     if len(xAxisChars) > 1 and checkWord(xAxisChars):
         score = getPointsFromWord(xAxisChars)
-        global wordConnectingToAtLeastOneOtherWord
-        wordConnectingToAtLeastOneOtherWord = True
         print(f"found valid word: {xAxisChars}, Gave {score} points")
 
     return False, score
@@ -205,8 +202,6 @@ def checkNeighboringWordsOnYaxis(x, y, currentLetter):
 
     if len(yAxisChars) > 1 and checkWord(yAxisChars):
         score = getPointsFromWord(yAxisChars)
-        global wordConnectingToAtLeastOneOtherWord
-        wordConnectingToAtLeastOneOtherWord = True
         print(f"found valid word: {yAxisChars}, Gave {score} points")
 
     return False, score
@@ -234,10 +229,8 @@ def increaseCoordinate(coordinate, direction, delta):
 def reset(savedBoard, savedHand):
     global board
     global hand
-    global wordConnectingToAtLeastOneOtherWord 
     board = savedBoard
-    hand[currentPlayer] = savedHand[currentPlayer]
-    wordConnectingToAtLeastOneOtherWord = False
+    hand[currentPlayer] = savedHand
 
 def getLettersPlacedOnBoard():
     letters = []
@@ -282,6 +275,8 @@ def placeWord(word, coordinate, direction):
             return False
         
         notMyLetter = False
+        if board[y][x]["letter"] == currentLetter:
+            connectedToOtherWord = True
         if board[y][x]["letter"] != "#" and board[y][x]["letter"] != currentLetter:
             print("tring to overwrite letter")
             reset(savedBoard, savedHand)
